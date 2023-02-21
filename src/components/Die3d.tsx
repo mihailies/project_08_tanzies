@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DieData } from "../App";
-import Die from "./Die";
+import DieFace from "./DieFace";
 
 export interface DieProps {
     data: DieData;
@@ -17,12 +17,12 @@ export default function Die3d(props: DieProps) {
         props.onClick();
     }}>
         <div className={"cube spin-to " + spinState}>
-            <Die mainClass="top" value={1} isHeld={props.data.isHeld && props.data.value == 1} />
-            <Die mainClass="bottom" value={6} isHeld={props.data.isHeld && props.data.value == 6} />
-            <Die mainClass="left" value={2} isHeld={props.data.isHeld && props.data.value == 2} />
-            <Die mainClass="front" value={3} isHeld={props.data.isHeld && props.data.value == 3} />
-            <Die mainClass="right" value={4} isHeld={props.data.isHeld && props.data.value == 4} />
-            <Die mainClass="back" value={5} isHeld={props.data.isHeld && props.data.value == 5} />
+            <DieFace mainClass="top" value={1} isHeld={props.data.isHeld && props.data.value == 1} />
+            <DieFace mainClass="bottom" value={6} isHeld={props.data.isHeld && props.data.value == 6} />
+            <DieFace mainClass="left" value={2} isHeld={props.data.isHeld && props.data.value == 2} />
+            <DieFace mainClass="front" value={3} isHeld={props.data.isHeld && props.data.value == 3} />
+            <DieFace mainClass="right" value={4} isHeld={props.data.isHeld && props.data.value == 4} />
+            <DieFace mainClass="back" value={5} isHeld={props.data.isHeld && props.data.value == 5} />
         </div>
     </div >
 }

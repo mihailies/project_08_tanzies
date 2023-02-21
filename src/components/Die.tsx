@@ -1,9 +1,4 @@
-import { DieData } from "../App";
-
-export interface DieProps {
-    data: DieData;
-    onClick: () => void;
-}
+import { DieProps } from "./Die3d";
 
 const one = [0, 0, 0, 0, 1, 0, 0, 0, 0];
 const two = [1, 0, 0, 0, 0, 0, 0, 0, 1];
@@ -13,11 +8,10 @@ const five = [1, 0, 1, 0, 1, 0, 1, 0, 1];
 const six = [1, 1, 1, 0, 0, 0, 1, 1, 1];
 
 
-export default function Die(props: DieProps) {
-    const dieData = props.data;
+export default function Die(props: { value: number, isHeld: boolean, mainClass: string }) {
 
     let dieArray = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    switch (dieData.value) {
+    switch (props.value) {
         case 1: dieArray = one; break;
         case 2: dieArray = two; break;
         case 3: dieArray = three; break;
@@ -27,12 +21,8 @@ export default function Die(props: DieProps) {
     }
     const dotsElements = dieArray.map((isDot, idx) => <div key={idx} className={isDot ? "dot" : "empty"}></div>);
 
-    return <div onClick={() => props.onClick()} className={dieData.isHeld ? 'held zar': "zar"}>
+    return <div className={props.mainClass + " " + (props.isHeld ? 'held die' : "die")}>
         {dotsElements}
     </div>;
 
-    // return <div onClick={() => props.onClick()}
-    //     className={dieData.isHeld ? "die held" : "die"} >
-    //     {dieData.value}
-    // </div>;
 }

@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
-import Die from './components/Die'
+import './style/main.scss'
 import { nanoid } from "nanoid"
 import Confetti from 'react-confetti';
 import Timer, { TimerAction } from './components/Timer';
+import Die3d from './components/Die3d'
 
 export interface DieData {
   value: number;
   isHeld: boolean;
-  id: string;
+  id: string;  
 }
 
 export interface GameResultData {
@@ -30,9 +31,7 @@ function App() {
     let results = JSON.parse(localStorage.getItem(TENZIES_LOCAL_STORAGE_ITEM_NAME) || "[]");
     return results ? results : [];
   })
-  const [gameTime, setGameTime] = useState(0);
-
-
+  const gameTime = useRef(0);
 
 
   useEffect(() => {
@@ -41,7 +40,7 @@ function App() {
       setTenzies(true);
       if (timerAction != TimerAction.stop) {
         let gameResultData: GameResultData = {
-          duration: gameTime,
+          duration: gameTime.current,
           moment: new Date().toLocaleString('en-US', { hour12: false, hour: "numeric", minute: "numeric", year: "numeric", month: "numeric", day: "numeric" }),
           rolls: rolls
         }
@@ -59,14 +58,12 @@ function App() {
   function allNewDice(): DieData[] {
     let result: DieData[] = [];
     for (let i = 0; i < 10; i++) {
-      result.push({ value: Math.ceil(Math.random() * 6), isHeld: false, id: nanoid() });
+      result.push({ value: Math.ceil(Math.random() * 6), isHeld: false, id: nanoid()});
     }
     return result;
   }
 
   function throwDices() {
-    const newDiceValues = allNewDice();
-
     // new game
     if (tenzies) {
       setRolls(1);
@@ -76,11 +73,15 @@ function App() {
       return;
     }
 
+    const newDiceValues = allNewDice();
     setTimerAction(TimerAction.start);
     setRolls((old) => ++old);
     setDices((oldDice) => {
       return oldDice.map((old, idx) => {
-        return { ...old, value: old.isHeld ? old.value : newDiceValues[idx].value }
+        return {
+          ...old, value: old.isHeld ? old.value : newDiceValues[idx].value, rolls: 1,
+          id: (old.value == newDiceValues[idx].value && !old.isHeld) ? nanoid() : old.id
+        }
       })
     })
   }
@@ -96,16 +97,16 @@ function App() {
   }
 
   let diceElements = dice.map((die, idx) => {
-    return <Die key={idx} data={die} onClick={() => holdDie(die.id)} />
+    return <Die3d key={die.id} data={die} onClick={() => holdDie(die.id)} />
   })
 
-  const resultsElements = gamesResult.map((result: GameResultData) => {
-    return <div key={nanoid()}>{result.moment + " -- Rolls: " + result.rolls + " -- Time: " + result.duration} </div>
+  const resultsElements = gamesResult.map((result: GameResultData, idx: number) => {
+    return <div key={idx}>{result.moment + " -- Rolls: " + result.rolls + " -- Time: " + result.duration} </div>
   })
 
   return (
     <>
-      <main className='tile'>
+      <main className='tile' style={{}}>
         {tenzies && <Confetti style={{ width: "100%", height: "100%" }} />}
         <h1 className="title">Tenzies</h1>
         <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
@@ -116,20 +117,13 @@ function App() {
           <div style={{ placeSelf: "start" }}>Rolls: {rolls}</div>
           <div style={{ placeSelf: "end" }}>
             <Timer action={timerAction} updateAppStateGameTime={(t) => {
-              setGameTime(t)
+              gameTime.current = t;
             }} />
           </div>
-        </div>
-
-        {/* <div style={{ display: "flex" }}>
-        <button onClick={() => setTimerAction(TAction.start)} >Start</button>
-        <button onClick={() => setTimerAction(TAction.reset)} >Reset</button>
-        <button onClick={() => setTimerAction(TAction.stop)} >Stop</button>
-        <button onClick={() => setTimerAction(TAction.restart)} >Restart</button>
-      </div> */}
+       </div>
         <button className='roll--dice' onClick={throwDices} >{tenzies ? "New game" : "Roll"}</button>
       </main>
-      <div style={{ color: '#fff', marginTop: "30px" }}>
+      <div style={{ color: '#fff', marginTop: "30px", maxHeight: "200px", padding: "20px", overflowY: "auto" }}>
         {resultsElements}
       </div>
     </>

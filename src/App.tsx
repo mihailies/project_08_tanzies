@@ -18,14 +18,16 @@ export interface GameResultData {
   duration: number;
 }
 
+
+
 const TENZIES_LOCAL_STORAGE_ITEM_NAME = "tenziesResults";
 
 function App() {
-  const [dice, setDices] = useState(() => {
+  const [dice, setDices] = useState<DieData[]>(() => {
     return allNewDice();
   });
-  const [tenzies, setTenzies] = useState(false);
-  const [rolls, setRolls] = useState(1);
+  const [gameWon, setGameWon] = useState<boolean>(false);
+  const [rolls, setRolls] = useState<number>(1);
   const [timerAction, setTimerAction] = useState(TimerAction.stop);
   const [gamesResult, setGamesResult] = useState(() => {
     let results = JSON.parse(localStorage.getItem(TENZIES_LOCAL_STORAGE_ITEM_NAME) || "[]");
@@ -37,7 +39,7 @@ function App() {
   useEffect(() => {
     let won: boolean = dice.every((die) => die.isHeld && die.value == dice[0].value);
     if (won) {
-      setTenzies(true);
+      setGameWon(true);
       if (timerAction != TimerAction.stop) {
         let gameResultData: GameResultData = {
           duration: gameTime.current,
@@ -56,6 +58,8 @@ function App() {
   }, [dice]);
 
   function allNewDice(): DieData[] {
+    console.log("All new dice!!!");
+    
     let result: DieData[] = [];
     for (let i = 0; i < 10; i++) {
       result.push({ value: Math.ceil(Math.random() * 6), isHeld: false, id: nanoid()});
@@ -65,9 +69,9 @@ function App() {
 
   function throwDices() {
     // new game
-    if (tenzies) {
+    if (gameWon) {
       setRolls(1);
-      setTenzies(false);
+      setGameWon(false);
       setDices(() => allNewDice());
       setTimerAction(TimerAction.reset)
       return;
@@ -87,7 +91,7 @@ function App() {
   }
 
   function holdDie(id: string): void {
-    if (tenzies) {
+    if (gameWon) {
       return;
     }
     setTimerAction(TimerAction.start);
@@ -107,7 +111,7 @@ function App() {
   return (
     <>
       <main className='tile' style={{}}>
-        {tenzies && <Confetti style={{ width: "100%", height: "100%" }} />}
+        {gameWon && <Confetti style={{ width: "100%", height: "100%" }} />}
         <h1 className="title">Tenzies</h1>
         <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
         <div className='dice--grid'>
@@ -121,7 +125,7 @@ function App() {
             }} />
           </div>
        </div>
-        <button className='roll--dice' onClick={throwDices} >{tenzies ? "New game" : "Roll"}</button>
+        <button className='roll--dice' onClick={throwDices} >{gameWon ? "New game" : "Roll"}</button>
       </main>
       <div style={{ color: '#fff', marginTop: "30px", maxHeight: "200px", padding: "20px", overflowY: "auto" }}>
         {resultsElements}
